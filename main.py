@@ -1,9 +1,17 @@
+from bs4 import BeautifulSoup
 import requests
-import json
+import csv
 
-# Call API endpoint at https://hacker-news.firebaseio.com/v0/ and print the results
-response = requests.get("https://hacker-news.firebaseio.com/v0/item/37958765.json?print=pretty")
-data = response.text
-parse_json = json.loads(data)
+page_to_scrape = requests.get("http://quotes.toscrape.com")
+soup = BeautifulSoup(page_to_scrape.text, "html.parser")
+quotes = soup.findAll("span", attrs={'class': 'text'})
+authors = soup.findAll("small", attrs={'class': 'author'})
 
-print(parse_json['time'])
+file = open("scraped_quotes.csv", "w")
+writer = csv.writer(file)
+
+writer.writerow(['QUOTES', "AUTHORS"])
+
+for quote, author in zip(quotes, authors):
+    print(quote.text + " - " + author.text)
+    writer.writerow([quote.text, author.text])
