@@ -1,17 +1,21 @@
 from bs4 import BeautifulSoup
 import requests
-import csv
+import pprint
+from datetime import datetime
 
-page_to_scrape = requests.get("http://quotes.toscrape.com")
-soup = BeautifulSoup(page_to_scrape.text, "html.parser")
-quotes = soup.findAll("span", attrs={'class': 'text'})
-authors = soup.findAll("small", attrs={'class': 'author'})
+website_count = dict()
+today_date = "2023-10-29"
+BASE_URL = "https://news.ycombinator.com/"
+query_url = BASE_URL + "front?day=" + today_date
 
-file = open("scraped_quotes.csv", "w")
-writer = csv.writer(file)
+today_posts = requests.get(query_url)
+soup = BeautifulSoup(today_posts.content, "html.parser")
+post_elements = soup.find_all("tr", class_="athing")
 
-writer.writerow(['QUOTES', "AUTHORS"])
+for post in post_elements:
+    website_element= post.find("span", class_="sitestr")
+    if website_element:
+        website_name = website_element.text
+        website_count[website_name] = website_count.get(website_name, 0) + 1    
 
-for quote, author in zip(quotes, authors):
-    print(quote.text + " - " + author.text)
-    writer.writerow([quote.text, author.text])
+pprint.pprint(website_count)
